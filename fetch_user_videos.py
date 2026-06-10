@@ -93,7 +93,7 @@ def main():
     if user_input.startswith(('http://', 'https://')) and any(x in user_input for x in ['video', 'reel']):
         # 直接处理单个视频链接
         print(f"检测到视频链接，使用 video_transcript_extractor.py 处理...")
-        output_dir = f"output/{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        output_dir = 'output'
         os.makedirs(output_dir, exist_ok=True)
         
         cmd = [

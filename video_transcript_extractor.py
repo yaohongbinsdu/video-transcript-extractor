@@ -23,6 +23,8 @@ from pathlib import Path
 from typing import Dict, Optional, Tuple
 from dataclasses import dataclass
 
+INVALID_PATH_CHARS = r'[<>:"/\\|?*\x00-\x1f]+'
+
 # 简繁转换（延迟导入，避免未安装时报错）
 OPENCC_AVAILABLE = False
 try:
@@ -55,6 +57,15 @@ class VideoMetadata:
     extract_time: str = ""
     source_type: str = ""  # "url" or "file"
     source_path: str = ""
+
+
+def build_output_dir_name(timestamp: str, title: str, max_length: int = 80) -> str:
+    title = re.sub(INVALID_PATH_CHARS, ' ', (title or '').strip())
+    title = re.sub(r'\s+', ' ', title).strip(' .')
+    if not title:
+        return timestamp
+    safe_title = title[:max_length].rstrip(' .')
+    return f"{timestamp}_{safe_title}" if safe_title else timestamp
 
 
 class VideoDownloader:
@@ -1218,8 +1229,6 @@ class VideoTranscriptExtractor:
         try:
             # 1. 准备输出目录
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-            output_dir = os.path.join(self.output_base, timestamp)
-            os.makedirs(output_dir, exist_ok=True)
             
             # 2. 下载视频或使用本地文件
             if source_type == 'url':
@@ -1242,6 +1251,9 @@ class VideoTranscriptExtractor:
                 source_type=source_type,
                 source_path=url or video_path
             )
+            
+            output_dir = os.path.join(self.output_base, build_output_dir_name(timestamp, metadata.title))
+            os.makedirs(output_dir, exist_ok=True)
             
             # 4. 提取音频
             print("正在提取音频...")
