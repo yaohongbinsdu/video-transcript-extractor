@@ -1,0 +1,48 @@
+# 视频文案提取工具 v3.3 - 依赖包
+
+# 核心依赖
+yt-dlp>=2024.0.0          # 视频下载（支持多平台、去水印）
+requests>=2.31.0          # HTTP 请求
+
+# 简繁转换
+opencc-python-reimplemented>=0.1.7  # 繁体转简体中文
+
+# 语音识别引擎（推荐使用 Whisper）
+# 方案 1：Whisper（推荐，GitHub openai/whisper，准确率高）
+openai-whisper>=20231117  # OpenAI Whisper 本地识别（支持中文）
+
+# 方案 2：FunASR（备选，识别效果好）
+# funasr>=1.0.0             # 阿里达摩院 FunASR（本地识别）
+# torch>=2.0.0              # PyTorch（CPU 版本）
+# torchaudio>=2.0.0         # 音频处理
+# modelscope>=1.9.0         # 模型管理
+
+# 方案 3：Sherpa-ONNX（轻量级备选，不依赖 torch）
+# 当环境限制无法安装 torch 时使用
+# sherpa-onnx>=1.0.0        # Sherpa-ONNX（轻量级 ASR）
+# numpy>=1.20.0             # Sherpa-ONNX 依赖
+
+# 可选依赖（高级功能）
+# ffmpeg-python>=0.2.0    # FFmpeg Python 封装（如需要程序化调用）
+
+# 说明：
+# 1. FFmpeg 需要单独安装系统级工具：
+#    - Windows: https://ffmpeg.org/download.html
+#    - macOS: brew install ffmpeg
+#    - Linux: apt install ffmpeg
+#
+# 2. 安装命令：
+#    pip install -r requirements.txt
+#
+# 3. 验证安装：
+#    python -c "import whisper; print(whisper.__version__)"
+#
+# 4. Whisper 模型：
+#    - tiny: 最快，准确率较低
+#    - base: 平衡速度和准确率（推荐）
+#    - small: 准确率更高
+#    - medium: 高准确率
+#    - large: 最高准确率，速度慢
+#
+# 5. 环境受限时的备选方案：
+#    - 如果无法安装 whisper，使用 FunASR 或 Sherpa-ONNX
