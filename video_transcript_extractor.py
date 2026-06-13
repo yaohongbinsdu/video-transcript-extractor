@@ -20,6 +20,7 @@ import re
 import time
 from datetime import datetime
 from pathlib import Path
+import shutil
 from typing import Dict, Optional, Tuple
 from dataclasses import dataclass
 
@@ -1292,20 +1293,27 @@ class VideoTranscriptExtractor:
             # 分段
             segmented_text = self.cleaner.segment_text(optimized_text)
             
-            # 7. 删除视频文件（节省空间）
+            # 7. 将视频文件移动到输出目录并以标题命名（保留视频）
             if source_type == 'url' and os.path.exists(video_file):
-                print(f"正在清理临时文件：{os.path.basename(video_file)}")
+                safe_title = re.sub(INVALID_PATH_CHARS, ' ', metadata.title or '').strip()
+                safe_title = re.sub(r'\s+', ' ', safe_title).strip(' .')[:80]
+                ext = Path(video_file).suffix
+                video_name = f"{safe_title}{ext}" if safe_title else f"{metadata.video_id}{ext}"
+                saved_video = os.path.join(output_dir, video_name)
                 try:
-                    os.remove(video_file)
-                    # 同时删除对应的音频文件
+                    shutil.move(video_file, saved_video)
+                    print(f"✅ 视频已保存：{video_name}")
+                except Exception as e:
+                    print(f"警告：保存视频文件失败 - {e}")
+                # 清理临时音频和元数据文件
+                try:
                     if os.path.exists(audio_file):
                         os.remove(audio_file)
-                    # 删除 info.json 元数据文件
-                    info_json = video_file.replace('.mp4', '.info.json')
+                    info_json = str(Path(video_file).with_suffix('')) + '.info.json'
                     if os.path.exists(info_json):
                         os.remove(info_json)
                 except Exception as e:
-                    print(f"警告：删除临时文件失败 - {e}")
+                    print(f"警告：清理临时文件失败 - {e}")
             
             # 8. 生成输出文件
             print("正在生成输出文件...")
